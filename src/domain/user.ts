@@ -4,7 +4,7 @@ import { IUser } from "../adapters/userinterface";
 export class User implements IUser {
 
     user_Background?: string | undefined;
-    user_credit?: number | undefined;
+    user_credit?: string | undefined;
     user_FotoRec?: string | undefined;
     user_RGTras?: string | undefined;
     user_RGFrente?: string | undefined;
@@ -25,8 +25,8 @@ export class User implements IUser {
     user_endcomplemento?: string | undefined;
     user_endcidade?: string | undefined;
     user_tipo?: string | undefined;
-    list_CPF_list_id?: number | undefined;
-    user_cel?: number | undefined;
+    list_CPF_list_id?: string | undefined;
+    user_cel?: string | undefined;
     user_idcli?: string | undefined;
     user_CPFR?: string | undefined;
 

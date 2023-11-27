@@ -28,8 +28,8 @@ export class SequelizeConnection implements IDatabaseConnection {
     return this.sequelize;
   }
 
-  Connect(): void {
-    this.sequelize.authenticate()
+  async Connect(): Promise<void> {
+    await this.sequelize.authenticate()
       .then(() => {
         console.log('Conexão Sequelize estabelecida com sucesso');
       })
@@ -38,8 +38,8 @@ export class SequelizeConnection implements IDatabaseConnection {
       });
   }
 
-  Disconnect(): void {
-    this.sequelize.close()
+  async Disconnect(): Promise<void> {
+    await this.sequelize.close()
       .then(() => {
         console.log('Conexão Sequelize encerrada');
       })

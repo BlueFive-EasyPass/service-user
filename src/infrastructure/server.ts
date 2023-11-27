@@ -1,12 +1,18 @@
 import fastify from 'fastify';
+import type { FastifyCookieOptions } from '@fastify/cookie'
+import cookie from '@fastify/cookie'
 
-// Cria uma instância do Fastify
-const app = fastify({ logger: true });// Rota simples
+const app = fastify({ logger: true });
+
+app.register(cookie, {
+  secret: "easypass.ofc@gmail.com", 
+  parseOptions: {}
+} as FastifyCookieOptions)
 
 app.register(require('fastify-autoroutes'), {
-  dir: '../routes', 
+  dir: '../routes',
 })
-// Inicia o servidor
+
 const start = async () => {
   try {
     await app.listen({ port: 3000 });

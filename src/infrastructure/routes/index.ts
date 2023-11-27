@@ -1,45 +1,43 @@
 import { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify'
 import { Resource } from 'fastify-autoroutes'
 import { UserController } from '../../adapters/usercontroller'
-import { IUser } from '../../adapters/userinterface'
 
 export default (fastify: FastifyInstance) => <Resource>{
-  get: {
-    handler: async (request: FastifyRequest, reply: FastifyReply) => {
+    get: {
+        handler: async (request: FastifyRequest, reply: FastifyReply) => {
+            const query = request.query
 
-      reply.send('this is get method')
+            try {
+                await UserController.GetUser(query, reply)
+            } catch (error) {
+                reply.code(500).send({ error: "Erro ao processar a requisição:" });
+            }
+        }
+    },
+    post: {
+        handler: async (request: FastifyRequest, reply: FastifyReply) => {
+            const formData: any = request.body
 
-    }
-  },
-  head: {
-    handler: async (request: FastifyRequest, reply: FastifyReply) => {
-      reply.send('this is head method')
+            try {
+                await UserController.SignUp(formData, reply)
 
-    }
-  },
-  patch: {
-    handler: async (request: FastifyRequest, reply: FastifyReply) => {
-      reply.send('this is patch method')
+            } catch (error) {
+                reply.code(500).send({ erro: "Erro ao processar a requisição" })
+            }
+        }
+    },
 
-    }
-  },
-  post: {
-    handler: async (request: FastifyRequest, reply: FastifyReply) => {
-      const formData: any = request.body
+    put: {
+        handler: async (request: FastifyRequest, reply: FastifyReply) => {
+            const { update: update } = request.body as any
+            const { query: query } = request.body as any
 
-      UserController.SignUp(formData, reply)
-    }
-  },
-  put: {
-    handler: async (request: FastifyRequest, reply: FastifyReply) => {
-      reply.send('this is put method')
+            try {
+                await UserController.UpdateUser(update, query, reply)
 
-    }
-  },
-  options: {
-    handler: async (request: FastifyRequest, reply: FastifyReply) => {
-      reply.send('this is options method')
-
-    }
-  },
+            } catch (error) {
+                reply.code(500).send({ erro: "Erro ao processar a requisição" })
+            }
+        }
+    },
 }
