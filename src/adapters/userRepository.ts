@@ -66,20 +66,11 @@ export class UserRepository implements IUserRepository {
     async update(userData: IUser['userData'], param: any): Promise<any> {
 
         try {
-            console.log(this.connection)
 
             this.connection.Connect();
             console.log('Conexão com o banco de dados estabelecida');
             const User = new UserModelDB(this.connection)
             const model = User.defineModel()
-
-
-            console.log(User)
-            console.log(model)
-
-            console.log(userData);
-            console.log(param);
-
 
             const resultUsers = await model.update({ ...userData }, {
                 where: {
@@ -87,15 +78,45 @@ export class UserRepository implements IUserRepository {
                 }
             });
 
-            console.log(resultUsers)
-            console.log(resultUsers.length)
-            console.log(resultUsers[0])
-
             if (resultUsers[0] > 0) {
-                return true
+                return resultUsers[0]
             } else {
                 return false
             }
+        } catch (error) {
+            console.error('Erro durante o cadastro:', error);
+            this.connection.Disconnect();
+            return false;
+        }
+    }
+
+    async login(userData: IUser['userData']): Promise<any> {
+
+        try {
+            console.log(this.connection)
+
+            this.connection.Connect();
+            console.log('Conexão com o banco de dados estabelecida');
+            const User = new UserModelDB(this.connection)
+            const model = User.defineModel()
+
+            console.log(User)
+            console.log(model)
+
+            const resultUsers = await model.findAll({
+                where: {
+                    user_CPF: userData?.user_CPF
+                }
+            });
+
+            this.connection.Disconnect();
+            console.log('RESULT DB: ',resultUsers)
+
+            const jsonResults = resultUsers.map((result: any) => result.toJSON());
+            console.log('RESULT JSON: ', jsonResults)
+
+
+            return jsonResults
         } catch (error) {
             console.error('Erro durante o cadastro:', error);
             this.connection.Disconnect();

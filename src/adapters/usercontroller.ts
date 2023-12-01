@@ -1,11 +1,6 @@
 import { FastifyReply } from "fastify";
 import { IUser } from "../interfaces/userinterface";
 import { MidUser } from "../application/miduser";
-import { Login } from "../application/login";
-import { JWTSign } from "../application/jwtsign";
-import { User } from "../domain/user";
-import { InstanceDB } from "./conectioninstance";
-import { IUserService } from "../interfaces/interfaceService";
 import { IController } from "../interfaces/interfacecontroller";
 import dotenv from 'dotenv'
 import { IMidUser } from "../interfaces/interfacemiduser";
@@ -23,7 +18,6 @@ export class UserController implements IController {
 
     async SignUp(reply: FastifyReply) {
         try {
-            console.log(this.user)
 
             const validateFields = this.mid.validateCompleteUser()
 
@@ -73,7 +67,11 @@ export class UserController implements IController {
 
 
             if (resultUpdate) {
-                reply.code(200).send({ send: `Usuário alterado`})
+                if (resultUpdate > 1) {
+                    reply.code(400).send({ error: `Mais de um usuário está sendo alterado: ${resultUpdate} usuários` })
+                } else {
+                    reply.code(200).send({ send: `${resultUpdate} usuário foi alterado` })
+                }
             } else {
                 reply.code(400).send({ error: 'Sem retornos' })
             }
@@ -83,43 +81,51 @@ export class UserController implements IController {
         }
     }
 
-    /*
 
-    async Login(user_CPF: IUser, password: string, reply: FastifyReply) {
-        const connection = InstanceDB.createConnection()
+    async Login(reply: FastifyReply) {
 
         try {
-            const resultLogin = await Login.loginExecute(user_CPF, connection)
-
+            const resultLogin = await this.user.loginSystem()
+            const a = {...resultLogin}
+            console.log('RESULT JSON: ', resultLogin[0])
+            console.log('RESULT SENHA: ', resultLogin[0].user_senha)
             if (!resultLogin) {
-                return reply.code(400).send({ error: "Erro ao logar na conta:" });
-            }
-
-            const compare = await MidUser.compareHash(resultLogin.user_senha, password)
-
-            if (compare) {
-                const token = await JWTSign.signExecute()
-                console.log('token: ', token);
-
-                const currentDate = new Date();
-                const expiresData = new Date();
-                expiresData.setDate(currentDate.getDate() + 7);
-
-                reply.setCookie('token', token, {
-                    secure: true,
-                    httpOnly: true,
-                    sameSite: 'strict',
-                    expires: expiresData
-                });
-
-                return reply.code(200).send('Logado');
+                return reply.code(400).send({ error: "CPF ou senha inválidos" });
             } else {
-                return reply.code(400).send({ error: "Erro ao logar na conta:" });
+                console.log('teste');
+                console.log(this.user)
+                console.log(this.user.userData)
+
+                const compare = await this.mid.compareHash(resultLogin[0].user_senha)
+                console.log('teste');
+
+                console.log('RESULT HASH: ', compare)
+
+
+                if (compare) {
+                    const token = await this.mid.createToken()
+                    console.log('token: ', token);
+
+                    const currentDate = new Date();
+                    const expiresData = new Date();
+                    expiresData.setDate(currentDate.getDate() + 7);
+
+                    reply.setCookie('token', token, {
+                        secure: true,
+                        httpOnly: true,
+                        sameSite: 'strict',
+                        expires: expiresData
+                    });
+
+                    return reply.code(200).send({ send: 'Logado' });
+                } else {
+                    return reply.code(400).send({ error: "Erro ao logar na conta:" });
+                }
             }
 
         } catch (error) {
             return reply.code(500).send({ error: "Erro ao processar a requisição:" });
         }
-    } */
+    }
 
 }

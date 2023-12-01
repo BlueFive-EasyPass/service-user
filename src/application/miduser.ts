@@ -1,6 +1,9 @@
 import { IMidUser } from "../interfaces/interfacemiduser";
 import { IUser } from "../interfaces/userinterface";
 import bcrypt from 'bcrypt'
+import * as JWT from 'jose'
+import dotenv from 'dotenv'
+dotenv.config()
 
 export class MidUser implements IMidUser {
     private userData: any;
@@ -49,11 +52,37 @@ export class MidUser implements IMidUser {
         return hash
     }
 
-    async compareHash(hash: string): Promise<boolean> {
+    async compareHash(hash: any): Promise<boolean> {
+        console.log(hash)
+        console.log('teste1');
+    
+        const match = await bcrypt.compare(this.userData.userData.user_senha, hash)
+        console.log('teste1');
+        console.log('match', match)
 
-        const match = await bcrypt.compare(this.userData.user_senha, hash)
+        if (match) {
+            return true
+        } else {
+            return false
+        }
+    }
 
-        return match
+    async createToken(): Promise<string> {
+        const secret = new TextEncoder().encode(
+            'cc7e0d44fd473002f1c42167459001140ec6389b7353f8088f4d9a95f2f596f2',
+          )
+          const alg = 'HS256'
+          
+          const jwt: string = await new JWT.SignJWT({ 'urn:example:claim': true })
+            .setProtectedHeader({ alg })
+            .setIssuedAt()
+            .setIssuer('urn:example:issuer')
+            .setAudience('urn:example:audience')
+            .setExpirationTime('7d')
+            .sign(secret)
+          
+
+        return jwt
     }
 
 }

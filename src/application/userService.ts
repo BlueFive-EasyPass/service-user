@@ -38,4 +38,13 @@ export class UserService implements IUserService {
       throw new Error("Erro ao salvar no banco de dados");
     }
   }
+
+  async loginSystem(userData: IUser['userData']) {
+    try {
+
+      return await this.userRepository.login(userData)
+    } catch (error) {
+      throw new Error("Erro ao salvar no banco de dados");
+    }
+  }
 }

@@ -40,29 +40,37 @@ export class User implements IUser {
 
     async updateUser(param: any) {
         try {
-            console.log(this.userData)
-            console.log(this.userService)
+
             const returnUpdate = await this.userService.updateUser(this.userData, param)
 
             console.log('RESULTADO', returnUpdate)
             console.log('RESULTADO', returnUpdate.length)
 
             if (returnUpdate) {
-                return true
+                return returnUpdate
             } else {
                 return false
             }
 
         } catch (error) {
-            console.log('ERRO PARA CARALHO')
-
             throw new Error("Erro ao salvar no banco de dados");
         }
     }
 
 
-    LoginSystem() {
+    async loginSystem() {
+        try {
+            console.log(this.userData)
+            console.log(this.userService)
 
+            const returnLogin = await this.userService.loginSystem(this.userData)
+            console.log('RESULT JSON: ', returnLogin)
+
+            return returnLogin
+        } catch (error) {
+            console.log('ERRO PARA CARALHO')
+            throw new Error("Erro ao salvar no banco de dados");
+        }
     }
 
 

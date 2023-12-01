@@ -4,5 +4,6 @@ export interface IMidUser {
     validateCompleteUser(): boolean;
     validateLoginCredentials(): boolean
     createHash(): Promise<any>
-    compareHash(hash: string): Promise<boolean>
+    compareHash(hash: any): Promise<boolean>
+    createToken(): Promise<string>;
 }

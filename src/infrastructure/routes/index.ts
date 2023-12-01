@@ -1,12 +1,11 @@
-import { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify'
+import { FastifyReply, FastifyRequest } from 'fastify'
 import { Resource } from 'fastify-autoroutes'
 import { InstanceManager } from '../instanceManager'
 import { MidUser } from '../../application/miduser'
 import { IMidUser } from '../../interfaces/interfacemiduser'
-import { IUser } from '../../interfaces/userinterface'
 import { IController } from '../../interfaces/interfacecontroller'
 
-export default (fastify: FastifyInstance) => <Resource>{
+export default () => <Resource>{
     get: {
         handler: async (request: FastifyRequest, reply: FastifyReply) => {
             const query: any = request.query

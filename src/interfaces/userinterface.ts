@@ -31,5 +31,6 @@ export interface IUser {
     saveToDatabase(): any
     searchUser(): any
     updateUser(arg0: any): any
+    loginSystem(): any
 }
 
