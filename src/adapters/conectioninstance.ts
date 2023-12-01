@@ -1,17 +1,17 @@
 import { SequelizeConnection } from '../infrastructure/database';
-import { IDatabaseConnection } from './databaseinterface';
+import { IDatabaseConnection } from '../interfaces/databaseinterface';
 
 
 export class InstanceDB {
-    static ControllerDB() {
+    createConnection(): IDatabaseConnection {
         const sequelizeConnection = new SequelizeConnection();
 
         const databaseConnection: IDatabaseConnection = {
             Connect: () => sequelizeConnection.Connect(),
             Disconnect: () => sequelizeConnection.Disconnect(),
-            Sequelize: sequelizeConnection.getSequelizeInstance(),
+            getInstance: () => sequelizeConnection.getInstance(),
         };
 
-        return databaseConnection
+        return databaseConnection;
     }
 }

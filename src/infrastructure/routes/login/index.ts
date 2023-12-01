@@ -3,7 +3,7 @@ import { Resource } from 'fastify-autoroutes'
 import { UserController } from '../../../adapters/usercontroller'
 
 export default (fastify: FastifyInstance) => <Resource>{
-    post: {
+    /*  post: {
         handler: async (request: FastifyRequest, reply: FastifyReply) => {
             const { user_CPF: cpf } = request.body as any
             const { user_senha: password } = request.body as any
@@ -16,5 +16,5 @@ export default (fastify: FastifyInstance) => <Resource>{
                 reply.code(500).send({ error: "Erro ao processar a requisição:" });
             }
         }
-    }
+    } */
 }

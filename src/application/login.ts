@@ -1,5 +1,5 @@
-import { IDatabaseConnection } from '../adapters/databaseinterface';
-import { IUser } from '../adapters/userinterface';
+import { IDatabaseConnection } from '../interfaces/databaseinterface';
+import { IUser } from '../interfaces/userinterface';
 import { UserModelDB } from '../infrastructure/modeldb';
 
 export class Login {

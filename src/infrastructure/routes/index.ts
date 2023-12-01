@@ -1,14 +1,23 @@
 import { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify'
 import { Resource } from 'fastify-autoroutes'
-import { UserController } from '../../adapters/usercontroller'
+import { InstanceManager } from '../instanceManager'
+import { MidUser } from '../../application/miduser'
+import { IMidUser } from '../../interfaces/interfacemiduser'
+import { IUser } from '../../interfaces/userinterface'
+import { IController } from '../../interfaces/interfacecontroller'
 
 export default (fastify: FastifyInstance) => <Resource>{
     get: {
         handler: async (request: FastifyRequest, reply: FastifyReply) => {
-            const query = request.query
+            const query: any = request.query
+            const instanceManager = new InstanceManager(query);
+            const controller: IController = instanceManager.getController();
+            console.log(query)
+            console.log(controller)
 
             try {
-                await UserController.GetUser(query, reply)
+                await controller.GetUser(reply)
+
             } catch (error) {
                 reply.code(500).send({ error: "Erro ao processar a requisição:" });
             }
@@ -16,10 +25,20 @@ export default (fastify: FastifyInstance) => <Resource>{
     },
     post: {
         handler: async (request: FastifyRequest, reply: FastifyReply) => {
-            const formData: any = request.body
+            const userData: any = request.body
+            const mid = new MidUser(userData)
+            const createHash: IMidUser = await mid.createHash()
+
+            const userDataWithHash = {
+                ...userData,
+                user_senha: createHash
+            }
+
+            const instanceManager = new InstanceManager(userDataWithHash);
+            const controller: IController = instanceManager.getController();
 
             try {
-                await UserController.SignUp(formData, reply)
+                await controller.SignUp(reply)
 
             } catch (error) {
                 reply.code(500).send({ erro: "Erro ao processar a requisição" })
@@ -28,15 +47,29 @@ export default (fastify: FastifyInstance) => <Resource>{
     },
 
     put: {
+        url: '/:cpf',
         handler: async (request: FastifyRequest, reply: FastifyReply) => {
-            const { update: update } = request.body as any
-            const { query: query } = request.body as any
+            const query = request.body as any
+            const { cpf } = request.params as any;
+            const param = {
+                user_CPF: cpf
+            }
+            console.log(query)
+            console.log(cpf)
 
-            try {
-                await UserController.UpdateUser(update, query, reply)
+            if (cpf === null || cpf === undefined || cpf === "" || cpf.length !== 11) {
+                reply.code(400).send({ erro: "Parametro enviado é inválido" })
 
-            } catch (error) {
-                reply.code(500).send({ erro: "Erro ao processar a requisição" })
+            } else {
+                const instanceManager = new InstanceManager(query);
+                const controller: IController = instanceManager.getController();
+
+                try {
+                    await controller.UpdateUser(param, reply)
+
+                } catch (error) {
+                    reply.code(500).send({ erro: "Erro ao processar a requisição" })
+                }
             }
         }
     },

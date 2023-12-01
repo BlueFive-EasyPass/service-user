@@ -1,8 +1,17 @@
-import { IUser } from "../adapters/userinterface";
+import { IMidUser } from "../interfaces/interfacemiduser";
+import { IUser } from "../interfaces/userinterface";
 import bcrypt from 'bcrypt'
 
-export class MidUser {
-    static validateCompleteUser(userData: IUser | any): boolean {
+export class MidUser implements IMidUser {
+    private userData: any;
+
+    constructor(userData: IUser){
+        this.userData = userData
+    }
+
+    validateCompleteUser(): boolean {
+        console.log(this.userData)
+
         const excludedFields: string[] = [
             'user_CPFR',
             'user_Background',
@@ -15,45 +24,36 @@ export class MidUser {
             'user_verifyemail'
         ];
 
-        const allFieldsExceptExcluded = Object.keys(userData).filter(
-            field => !excludedFields.includes(field)
-        );
-
-        const allFieldsPresentString = allFieldsExceptExcluded.every(field => {
-            return userData[field] !== undefined && typeof userData[field] === 'string';
-        });
-
-        const allRequiredFieldsPresent = Object.keys(userData)
+        const allRequiredFieldsPresent = Object.keys(this.userData)
             .filter(field => !excludedFields.includes(field))
-            .every(field => userData[field] !== undefined);
+            .every(field => this.userData[field] !== undefined);
 
-        return allFieldsPresentString && allRequiredFieldsPresent;
+            console.log(allRequiredFieldsPresent);
+
+
+        return allRequiredFieldsPresent;
     }
 
-    static validateLoginCredentials(userData: Partial<IUser>): boolean {
+    validateLoginCredentials(): boolean {
         return (
-            'user_CPF' in userData &&
-            'user_senha' in userData &&
-            typeof userData.user_CPF === 'string' &&
-            typeof userData.user_senha === 'string'
+            'user_CPF' in this.userData &&
+            'user_senha' in this.userData &&
+            typeof this.userData.user_CPF === 'string' &&
+            typeof this.userData.user_senha === 'string'
         );
     }
 
-    static async createHash(password: any) {
-        const hash = await bcrypt.hash(password, 10);
+    async createHash(): Promise<any> {
+        const hash = await bcrypt.hash(this.userData.user_senha, 10);
 
         return hash
     }
 
-    static async compareHash(hash: string, password: string): Promise<boolean> {
+    async compareHash(hash: string): Promise<boolean> {
 
-        const match = await bcrypt.compare(password, hash)
-        
-        if (match) {
-            return true
-        } else {
-            return false
-        }
+        const match = await bcrypt.compare(this.userData.user_senha, hash)
+
+        return match
     }
 
 }

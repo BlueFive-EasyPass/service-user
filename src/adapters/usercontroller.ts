@@ -1,50 +1,92 @@
 import { FastifyReply } from "fastify";
-import { SignUp } from "../application/signup";
-import { IUser } from "./userinterface";
+import { IUser } from "../interfaces/userinterface";
 import { MidUser } from "../application/miduser";
 import { Login } from "../application/login";
-import { InstanceDB } from "./conectioninstance";
 import { JWTSign } from "../application/jwtsign";
-import { GetUser } from "../application/getcustomuser";
-import { UpdateUser } from "../application/updateuser";
+import { User } from "../domain/user";
+import { InstanceDB } from "./conectioninstance";
+import { IUserService } from "../interfaces/interfaceService";
+import { IController } from "../interfaces/interfacecontroller";
+import dotenv from 'dotenv'
+import { IMidUser } from "../interfaces/interfacemiduser";
 
-export class UserController {
+dotenv.config()
 
-    static async SignUp(userData: IUser, reply: FastifyReply) {
-        const connection = InstanceDB.ControllerDB()
-        const validateInterface = MidUser.validateCompleteUser(userData)
-        const newHash = await MidUser.createHash(userData.user_senha)
-        const userDataWithHash = {
-            ...userData,
-            user_senha: newHash
-        }
+export class UserController implements IController {
+    private user: IUser;
+    private mid: IMidUser;
 
-        console.debug(userDataWithHash.user_senha);
+    constructor(user: IUser) {
+        this.user = user;
+        this.mid = new MidUser(this.user)
+    }
 
-
-        if (!validateInterface) {
-            reply.code(400).send({ error: "Dados incompletos ou tipo de dados incorretos" });
-        }
-
+    async SignUp(reply: FastifyReply) {
         try {
-            const successfulSignUp = await SignUp.signUpExecute(userDataWithHash, connection)
+            console.log(this.user)
 
-            if (successfulSignUp) {
-                reply.code(200).send(userData);
+            const validateFields = this.mid.validateCompleteUser()
 
+            if (!validateFields) {
+                reply.code(400).send({ error: "Formato do envio inválido:" });
             } else {
-                reply.code(400).send({ error: "Erro ao salvar no banco de dados:" });
+                const successfulSignUp = await this.user.saveToDatabase();
+                console.log(successfulSignUp)
 
+                if (successfulSignUp) {
+                    reply.code(200).send({ user: this.user.userData, get: process.env.service });
+                } else {
+                    reply.code(400).send({ error: "Erro ao salvar no banco de dados:" });
+                }
             }
 
         } catch (error) {
+
             reply.code(400).send({ error: "Erro ao salvar no banco de dados:" });
         }
-
     }
 
-    static async Login(user_CPF: IUser, password: string, reply: FastifyReply) {
-        const connection = InstanceDB.ControllerDB()
+    async GetUser(reply: FastifyReply) {
+
+        try {
+            const resultSearch = await this.user.searchUser()
+
+            if (resultSearch) {
+                reply.code(200).send(resultSearch)
+            } else {
+                reply.code(400).send({ error: 'Sem retornos' })
+            }
+
+        } catch (error) {
+            return reply.code(500).send({ error: "Erro ao processar a requisição:" })
+        }
+    }
+
+    async UpdateUser(param: any, reply: FastifyReply) {
+        console.log(param);
+        console.log(this.user);
+
+        try {
+            const resultUpdate = await this.user.updateUser(param)
+            console.log(resultUpdate);
+            console.log(resultUpdate);
+
+
+            if (resultUpdate) {
+                reply.code(200).send({ send: `Usuário alterado`})
+            } else {
+                reply.code(400).send({ error: 'Sem retornos' })
+            }
+
+        } catch (error) {
+            return reply.code(500).send({ error: "Erro ao processar a requisição:" })
+        }
+    }
+
+    /*
+
+    async Login(user_CPF: IUser, password: string, reply: FastifyReply) {
+        const connection = InstanceDB.createConnection()
 
         try {
             const resultLogin = await Login.loginExecute(user_CPF, connection)
@@ -78,44 +120,6 @@ export class UserController {
         } catch (error) {
             return reply.code(500).send({ error: "Erro ao processar a requisição:" });
         }
-    }
-
-    static async GetUser(query: any, reply: FastifyReply) {
-        const connection = InstanceDB.ControllerDB()
-
-        try {
-            const resultSearch = await GetUser.searchUserExecute(query, connection)
-
-            if (resultSearch.length > 0) {
-                reply.code(200).send(resultSearch)
-            } else {
-                reply.code(400).send({ error: 'Sem retornos' })
-            }
-
-        } catch (error) {
-            return reply.code(500).send({ error: "Erro ao processar a requisição:" })
-        }
-    }
-
-    static async UpdateUser(update: any, query: any, reply: FastifyReply) {
-        const connection = InstanceDB.ControllerDB()
-        console.log(update, query);
-
-        try {
-            const resultSearch = await UpdateUser.updateUserExecute(update, query, connection)
-            console.log(resultSearch);
-            console.log(resultSearch);
-
-
-            if (resultSearch.length > 0) {
-                reply.code(200).send(resultSearch)
-            } else {
-                reply.code(400).send({ error: 'Sem retornos' })
-            }
-
-        } catch (error) {
-            return reply.code(500).send({ error: "Erro ao processar a requisição:" })
-        }
-    }
+    } */
 
 }

@@ -1,11 +1,18 @@
 import { DataTypes } from 'sequelize';
-import { InstanceDB } from '../adapters/conectioninstance';
+import { IDatabaseConnection } from '../interfaces/databaseinterface';
 
-const connection = InstanceDB.ControllerDB();
 
 export class UserModelDB {
-    static defineModel() {
-        return connection.Sequelize.define('user', {
+    private connection: IDatabaseConnection;
+    private instance;
+
+    constructor(connection: IDatabaseConnection) {
+        this.connection = connection;
+        this.instance = this.connection.getInstance();
+    }
+
+    defineModel() {
+        return this.instance.define('user', {
             user_CPF: {
                 type: DataTypes.STRING,
                 primaryKey: true,
@@ -96,16 +103,18 @@ export class UserModelDB {
             timestamps: false
         });
     }
-
-    static async syncModel() {
+    async syncModel() {
         try {
             const User = this.defineModel();
-            await connection.Sequelize.sync();
+            this.connection.Connect();
+            await this.instance.sync();
             console.log('Modelo sincronizado com o banco de dados');
             return User;
         } catch (err) {
             console.error('Erro ao sincronizar o modelo:', err);
             throw err;
+        } finally {
+            this.connection.Disconnect();
         }
     }
 }
