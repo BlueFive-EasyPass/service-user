@@ -1,8 +1,9 @@
 import { DataTypes } from 'sequelize';
-import { IDatabaseConnection } from '../interfaces/databaseinterface';
+import { IDatabaseConnection } from '../interfaces/databaseInterface';
+import { IModelDB } from '../interfaces/interfaceModel';
 
 
-export class UserModelDB {
+export class UserModelDB implements IModelDB {
     private connection: IDatabaseConnection;
     private instance;
 
@@ -11,7 +12,7 @@ export class UserModelDB {
         this.instance = this.connection.getInstance();
     }
 
-    defineModel() {
+    private defineModel() {
         return this.instance.define('user', {
             user_CPF: {
                 type: DataTypes.STRING,
@@ -103,18 +104,22 @@ export class UserModelDB {
             timestamps: false
         });
     }
+
     async syncModel() {
         try {
-            const User = this.defineModel();
+            const bussines = this.defineModel();
             this.connection.Connect();
             await this.instance.sync();
             console.log('Modelo sincronizado com o banco de dados');
-            return User;
+            return bussines;
         } catch (err) {
             console.error('Erro ao sincronizar o modelo:', err);
             throw err;
-        } finally {
-            this.connection.Disconnect();
         }
+    }
+
+    desconnectModel() {
+        console.log('Modelo desconectado');
+        this.connection.Disconnect();
     }
 }

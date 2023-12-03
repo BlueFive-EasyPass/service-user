@@ -1,5 +1,5 @@
-import { IMidUser } from "../interfaces/interfacemiduser";
-import { IUser } from "../interfaces/userinterface";
+import { IMidUser } from "../interfaces/interfaceMidUser";
+import { IUser } from "../interfaces/userInterface";
 import bcrypt from 'bcrypt'
 import * as JWT from 'jose'
 import dotenv from 'dotenv'
@@ -8,7 +8,7 @@ dotenv.config()
 export class MidUser implements IMidUser {
     private userData: any;
 
-    constructor(userData: IUser){
+    constructor(userData: IUser['userData']){
         this.userData = userData
     }
 
@@ -56,7 +56,7 @@ export class MidUser implements IMidUser {
         console.log(hash)
         console.log('teste1');
     
-        const match = await bcrypt.compare(this.userData.userData.user_senha, hash)
+        const match = await bcrypt.compare(this.userData.user_senha, hash)
         console.log('teste1');
         console.log('match', match)
 

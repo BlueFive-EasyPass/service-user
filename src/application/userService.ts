@@ -1,6 +1,6 @@
 import { IUserRepository } from "../interfaces/interfaceRepository";
 import { IUserService } from "../interfaces/interfaceService";
-import { IUser } from "../interfaces/userinterface";
+import { IUser } from "../interfaces/userInterface";
 
 export class UserService implements IUserService {
   private userRepository: IUserRepository;
@@ -8,6 +8,27 @@ export class UserService implements IUserService {
   constructor(userRepository: IUserRepository) {
     this.userRepository = userRepository;
   }
+
+  async sendImage(image: IUser['imagem']): Promise<boolean> {
+    try {
+      const resultSend = await this.userRepository.image(image)
+
+      return resultSend
+    } catch (error) {
+      throw new Error("Erro ao salvar no banco de dados");
+    }
+  }
+
+  async getImage(image: IUser['imagem']): Promise<any> {
+    try {
+      const resultSend: Buffer = await this.userRepository.getimage(image)
+
+      return resultSend
+    } catch (error) {
+      throw new Error("Erro ao salvar no banco de dados");
+    }
+  }
+
 
   async signUp(userData: IUser['userData']): Promise<boolean> {
     try {
@@ -47,4 +68,24 @@ export class UserService implements IUserService {
       throw new Error("Erro ao salvar no banco de dados");
     }
   }
+
+  async cancelUser(userData: IUser['userData']) {
+    try {
+
+      return await this.userRepository.cancel(userData)
+    } catch (error) {
+      throw new Error("Erro ao salvar no banco de dados");
+    }
+  }
+
+  async activateUser(userData: IUser['userData']) {
+    try {
+
+      return await this.userRepository.activate(userData)
+    } catch (error) {
+      throw new Error("Erro ao salvar no banco de dados");
+    }
+  }
+
+
 }

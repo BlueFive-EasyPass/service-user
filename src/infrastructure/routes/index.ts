@@ -1,15 +1,15 @@
 import { FastifyReply, FastifyRequest } from 'fastify'
 import { Resource } from 'fastify-autoroutes'
 import { InstanceManager } from '../instanceManager'
-import { MidUser } from '../../application/miduser'
-import { IMidUser } from '../../interfaces/interfacemiduser'
-import { IController } from '../../interfaces/interfacecontroller'
+import { MidUser } from '../../application/midUser'
+import { IMidUser } from '../../interfaces/interfaceMidUser'
+import { IController } from '../../interfaces/interfaceController'
 
 export default () => <Resource>{
     get: {
         handler: async (request: FastifyRequest, reply: FastifyReply) => {
             const query: any = request.query
-            const instanceManager = new InstanceManager(query);
+            const instanceManager = new InstanceManager(query, null);
             const controller: IController = instanceManager.getController();
             console.log(query)
             console.log(controller)
@@ -33,7 +33,7 @@ export default () => <Resource>{
                 user_senha: createHash
             }
 
-            const instanceManager = new InstanceManager(userDataWithHash);
+            const instanceManager = new InstanceManager(userDataWithHash, null);
             const controller: IController = instanceManager.getController();
 
             try {
@@ -60,7 +60,7 @@ export default () => <Resource>{
                 reply.code(400).send({ erro: "Parametro enviado é inválido" })
 
             } else {
-                const instanceManager = new InstanceManager(query);
+                const instanceManager = new InstanceManager(query, null);
                 const controller: IController = instanceManager.getController();
 
                 try {

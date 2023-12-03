@@ -1,4 +1,4 @@
-import { IDatabaseConnection } from "./databaseinterface";
+import { IDatabaseConnection } from "./databaseInterface";
 import { IUserRepository } from "./interfaceRepository";
 import { IUserService } from "./interfaceService";
 

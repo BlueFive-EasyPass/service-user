@@ -1,5 +1,5 @@
-import { SequelizeConnection } from '../infrastructure/database';
-import { IDatabaseConnection } from '../interfaces/databaseinterface';
+import { SequelizeConnection } from './database';
+import { IDatabaseConnection } from '../interfaces/databaseInterface';
 
 
 export class InstanceDB {

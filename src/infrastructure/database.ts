@@ -1,5 +1,5 @@
 import { Sequelize } from 'sequelize';
-import { IDatabaseConnection } from '../interfaces/databaseinterface';
+import { IDatabaseConnection } from '../interfaces/databaseInterface';
 import dotenv from 'dotenv'
 
 dotenv.config()

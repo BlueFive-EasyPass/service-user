@@ -1,4 +1,4 @@
-import { IUser } from "./userinterface";
+import { IUser } from "./userInterface";
 
 export interface IMidUser {
     validateCompleteUser(): boolean;

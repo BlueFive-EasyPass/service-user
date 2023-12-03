@@ -1,49 +1,93 @@
-import { UserModelDB } from "../infrastructure/modeldb";
-import { IDatabaseConnection } from "../interfaces/databaseinterface";
+import { IModelDB } from "../interfaces/interfaceModel";
 import { IUserRepository } from "../interfaces/interfaceRepository";
-import { IUser } from "../interfaces/userinterface";
+import { IUser } from "../interfaces/userInterface";
+import axios from 'axios';
+import AWS from 'aws-sdk';
+import { IAWSConfig } from "../interfaces/interfaceAWS";
 
 export class UserRepository implements IUserRepository {
-    private connection: IDatabaseConnection;
+    private modelDB: IModelDB
+    private AWS: AWS.S3
+    private AWSSendParams: IAWSConfig['sendParams']
+    private AWSGetParams: IAWSConfig['getParams']
 
-    constructor(connection: IDatabaseConnection) {
-        this.connection = connection;
+    constructor(modelDB: IModelDB, AWS: IAWSConfig) {
+        this.modelDB = modelDB
+        this.AWS = AWS.getS3Instance()
+        this.AWSSendParams = AWS.sendParams
+        this.AWSGetParams = AWS.getParams
     }
+
+
+    async image(image: IUser['imagem']): Promise<boolean> {
+        try {
+
+            console.log('CHEGAMO', image);
+            const params = await this.AWSSendParams(image)
+            console.log(params);
+            const result = await this.AWS.upload(params).promise();
+            console.log(result);
+
+            if (result) {
+                return true
+            } else {
+                return false
+            }
+
+        } catch (error) {
+            console.error('Erro ao salvar imagem:', error);
+            return false;
+        }
+    }
+
+    async getimage(image: IUser['imagem']): Promise<any> {
+        try {
+
+            console.log('CHEGAMO', image);
+            const params = await this.AWSGetParams(image)
+            const response = await axios.get(params, { responseType: 'arraybuffer' });
+
+            if (response && response.data) {
+                return Buffer.from(response.data, 'binary');
+            } else {
+                return false
+            }
+
+        } catch (error) {
+            console.error('Erro ao salvar imagem:', error);
+            return false;
+        }
+    }
+
 
     async save(userData: IUser['userData']): Promise<boolean> {
         try {
-            console.log(this.connection)
+            console.log(this.modelDB)
 
-            this.connection.Connect();
+            const model = await this.modelDB.syncModel()
             console.log('Conexão com o banco de dados estabelecida');
-            const User = new UserModelDB(this.connection)
-            const model = User.defineModel()
 
-            console.log(User)
             console.log(model)
 
             await model.create({ ...userData });
 
-            this.connection.Disconnect();
             return true;
         } catch (error) {
             console.error('Erro durante o cadastro:', error);
-            this.connection.Disconnect();
             return false;
+        } finally {
+            this.modelDB.desconnectModel()
         }
     }
 
     async get(userData: IUser['userData']): Promise<any> {
 
         try {
-            console.log(this.connection)
+            console.log(this.modelDB)
 
-            this.connection.Connect();
+            const model = await this.modelDB.syncModel()
             console.log('Conexão com o banco de dados estabelecida');
-            const User = new UserModelDB(this.connection)
-            const model = User.defineModel()
 
-            console.log(User)
             console.log(model)
 
             const resultUsers = await model.findAll({
@@ -53,13 +97,13 @@ export class UserRepository implements IUserRepository {
             });
 
             const jsonResults = resultUsers.map((result: any) => result.toJSON());
-            this.connection.Disconnect();
 
             return jsonResults;
         } catch (error) {
             console.error('Erro durante o cadastro:', error);
-            this.connection.Disconnect();
             return false;
+        } finally {
+            this.modelDB.desconnectModel()
         }
     }
 
@@ -67,10 +111,12 @@ export class UserRepository implements IUserRepository {
 
         try {
 
-            this.connection.Connect();
+            console.log(this.modelDB)
+
+            const model = await this.modelDB.syncModel()
             console.log('Conexão com o banco de dados estabelecida');
-            const User = new UserModelDB(this.connection)
-            const model = User.defineModel()
+
+            console.log(model)
 
             const resultUsers = await model.update({ ...userData }, {
                 where: {
@@ -85,23 +131,24 @@ export class UserRepository implements IUserRepository {
             }
         } catch (error) {
             console.error('Erro durante o cadastro:', error);
-            this.connection.Disconnect();
             return false;
+        } finally {
+            this.modelDB.desconnectModel()
         }
     }
 
     async login(userData: IUser['userData']): Promise<any> {
 
         try {
-            console.log(this.connection)
+            console.log(this.modelDB)
 
-            this.connection.Connect();
+            const model = await this.modelDB.syncModel()
             console.log('Conexão com o banco de dados estabelecida');
-            const User = new UserModelDB(this.connection)
-            const model = User.defineModel()
 
-            console.log(User)
             console.log(model)
+
+            console.log(userData)
+
 
             const resultUsers = await model.findAll({
                 where: {
@@ -109,8 +156,7 @@ export class UserRepository implements IUserRepository {
                 }
             });
 
-            this.connection.Disconnect();
-            console.log('RESULT DB: ',resultUsers)
+            console.log('RESULT DB: ', resultUsers)
 
             const jsonResults = resultUsers.map((result: any) => result.toJSON());
             console.log('RESULT JSON: ', jsonResults)
@@ -119,8 +165,75 @@ export class UserRepository implements IUserRepository {
             return jsonResults
         } catch (error) {
             console.error('Erro durante o cadastro:', error);
-            this.connection.Disconnect();
             return false;
+        } finally {
+            this.modelDB.desconnectModel()
+        }
+    }
+
+    async cancel(userData: IUser['userData']): Promise<any> {
+        try {
+            console.log(this.modelDB)
+
+            const model = await this.modelDB.syncModel()
+            console.log('Conexão com o banco de dados estabelecida');
+
+            console.log(model)
+
+            console.log(userData)
+
+            const resultCancel = await model.update({ user_status: 'cancelado' }, {
+                where: {
+                    ...userData
+                }
+            });
+
+            console.log(resultCancel);
+
+            if (resultCancel[0] === 1) {
+                return true;
+            } else {
+                return false;
+            }
+
+        } catch (error) {
+            console.error('Erro durante a atualização:', error);
+            return false;
+        } finally {
+            this.modelDB.desconnectModel()
+        }
+    }
+
+    async activate(userData: IUser['userData']): Promise<any> {
+        try {
+            console.log(this.modelDB)
+
+            const model = await this.modelDB.syncModel()
+            console.log('Conexão com o banco de dados estabelecida');
+
+            console.log(model)
+
+            console.log(userData)
+
+            const resultCancel = await model.update({ user_status: 'ativo' }, {
+                where: {
+                    ...userData
+                }
+            });
+
+            console.log(resultCancel);
+
+            if (resultCancel[0] === 1) {
+                return true;
+            } else {
+                return false;
+            }
+
+        } catch (error) {
+            console.error('Erro durante a atualização:', error);
+            return false;
+        } finally {
+            this.modelDB.desconnectModel()
         }
     }
 }

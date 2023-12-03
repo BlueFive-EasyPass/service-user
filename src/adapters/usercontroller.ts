@@ -1,9 +1,9 @@
-import { FastifyReply } from "fastify";
-import { IUser } from "../interfaces/userinterface";
-import { MidUser } from "../application/miduser";
-import { IController } from "../interfaces/interfacecontroller";
+import { FastifyReply, FastifySchema, FastifyTypeProviderDefault, RawServerDefault, RouteGenericInterface } from "fastify";
+import { IUser } from "../interfaces/userInterface";
+import { IController } from "../interfaces/interfaceController";
 import dotenv from 'dotenv'
-import { IMidUser } from "../interfaces/interfacemiduser";
+import { IMidUser } from "../interfaces/interfaceMidUser";
+import { IncomingMessage, ServerResponse } from "http";
 
 dotenv.config()
 
@@ -11,9 +11,33 @@ export class UserController implements IController {
     private user: IUser;
     private mid: IMidUser;
 
-    constructor(user: IUser) {
+    constructor(user: IUser, mid: IMidUser) {
         this.user = user;
-        this.mid = new MidUser(this.user)
+        this.mid = mid
+    }
+
+    async SendImage(reply: FastifyReply) {
+        try {
+            const resultSend = await this.user.sendImage()
+
+            if (resultSend) {
+                reply.code(200).send({ send: 'FOI MLK' });
+            }
+        } catch (error) {
+            reply.code(400).send({ error: "Erro ao salvar imagem:" });
+        }
+    }
+
+    async GetImage(reply: FastifyReply) {
+        try {
+            const resultSend: Buffer = await this.user.getImage()
+
+            if (resultSend) {
+                reply.code(200).send({ send: resultSend });
+            }
+        } catch (error) {
+            reply.code(400).send({ error: "Erro ao salvar imagem:" });
+        }
     }
 
     async SignUp(reply: FastifyReply) {
@@ -28,7 +52,7 @@ export class UserController implements IController {
                 console.log(successfulSignUp)
 
                 if (successfulSignUp) {
-                    reply.code(200).send({ user: this.user.userData, get: process.env.service });
+                    reply.code(200).send({ send: this.user.userData, get: process.env.service });
                 } else {
                     reply.code(400).send({ error: "Erro ao salvar no banco de dados:" });
                 }
@@ -46,7 +70,7 @@ export class UserController implements IController {
             const resultSearch = await this.user.searchUser()
 
             if (resultSearch) {
-                reply.code(200).send(resultSearch)
+                reply.code(200).send({ send: resultSearch })
             } else {
                 reply.code(400).send({ error: 'Sem retornos' })
             }
@@ -70,7 +94,7 @@ export class UserController implements IController {
                 if (resultUpdate > 1) {
                     reply.code(400).send({ error: `Mais de um usuário está sendo alterado: ${resultUpdate} usuários` })
                 } else {
-                    reply.code(200).send({ send: `${resultUpdate} usuário foi alterado` })
+                    reply.code(200).send({ send: `Usuário: ${this.user.userData?.user_CPF}, foi alterado com sucesso` })
                 }
             } else {
                 reply.code(400).send({ error: 'Sem retornos' })
@@ -85,8 +109,10 @@ export class UserController implements IController {
     async Login(reply: FastifyReply) {
 
         try {
+            console.log(this.user);
+
             const resultLogin = await this.user.loginSystem()
-            const a = {...resultLogin}
+            const a = { ...resultLogin }
             console.log('RESULT JSON: ', resultLogin[0])
             console.log('RESULT SENHA: ', resultLogin[0].user_senha)
             if (!resultLogin) {
@@ -127,5 +153,46 @@ export class UserController implements IController {
             return reply.code(500).send({ error: "Erro ao processar a requisição:" });
         }
     }
+
+    async CancelUser(reply: FastifyReply) {
+        console.log(this.user);
+
+        try {
+            const resultUpdate = await this.user.cancelUser()
+            console.log(resultUpdate);
+            console.log(resultUpdate);
+
+
+            if (resultUpdate) {
+                reply.code(200).send({ send: `Usuário: ${this.user.userData?.user_CPF}, foi cancelado` })
+            } else {
+                reply.code(400).send({ error: 'Erro ao cancelar usuário' })
+            }
+
+        } catch (error) {
+            return reply.code(500).send({ error: "Erro ao processar a requisição:" })
+        }
+    }
+
+    async ActivateUser(reply: FastifyReply) {
+        console.log(this.user);
+
+        try {
+            const resultUpdate = await this.user.activateUser()
+            console.log(resultUpdate);
+            console.log(resultUpdate);
+
+
+            if (resultUpdate) {
+                reply.code(200).send({ send: `Usuário: ${this.user.userData?.user_CPF}, foi ativo` })
+            } else {
+                reply.code(400).send({ error: 'Erro ao ativar usuário' })
+            }
+
+        } catch (error) {
+            return reply.code(500).send({ error: "Erro ao processar a requisição:" })
+        }
+    }
+
 
 }
