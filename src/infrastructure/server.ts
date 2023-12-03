@@ -20,7 +20,7 @@ app.register(require('fastify-autoroutes'), {
 const start = async () => {
   try {
     await app.listen({ port: 3000 });
-    app.log.info(`Servidor rodando em ${app.server.address()}`);
+    app.log.info(`User Service rodando em ${app.server.address()}`);
   } catch (err) {
     app.log.error(err);
     process.exit(1);

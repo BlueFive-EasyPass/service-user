@@ -112,7 +112,6 @@ export class UserController implements IController {
             console.log(this.user);
 
             const resultLogin = await this.user.loginSystem()
-            const a = { ...resultLogin }
             console.log('RESULT JSON: ', resultLogin[0])
             console.log('RESULT SENHA: ', resultLogin[0].user_senha)
             if (!resultLogin) {

@@ -1,8 +1,8 @@
 import { FastifyReply, FastifyRequest } from 'fastify'
 import { Resource } from 'fastify-autoroutes'
-import { IController } from '../../../interfaces/interfaceController'
-import { InstanceManager } from '../../instanceManager'
-import { IUser } from '../../../interfaces/userInterface'
+import { InstanceManager } from '../../instanceManager';
+import { IController } from '../../../interfaces/interfaceController';
+import { IUser } from '../../../interfaces/userInterface';
 
 export default () => <Resource>{
     patch: {

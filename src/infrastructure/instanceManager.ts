@@ -19,7 +19,7 @@ export class InstanceManager {
   private databaseConnection: IInstanceDB;
   private userRepository: IUserRepository;
   private userService: IUserService;
-  private user: IUser;
+  private user: any;
   private controller: UserController;
   private modelDB: IModelDB
   private mid: IMidUser;
