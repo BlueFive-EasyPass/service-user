@@ -4,6 +4,7 @@
   "description": "",
   "main": "server.ts",
   "dependencies": {
+    "@aws-sdk/client-sqs": "^3.468.0",
     "@fastify/cookie": "^9.2.0",
     "@fastify/express": "^2.3.0",
     "@fastify/http-proxy": "^9.3.0",

@@ -8,39 +8,37 @@ import { UserModelDB } from "./modelDB";
 import { IModelDB } from "../interfaces/interfaceModel";
 import { IUserService } from "../interfaces/interfaceService";
 import { IUserRepository } from "../interfaces/interfaceRepository";
-import { IInstanceDB } from "../interfaces/databaseInterface";
 import { IMidUser } from "../interfaces/interfaceMidUser";
 import { MidUser } from "../application/midUser";
-import { IAWSConfig } from "../interfaces/interfaceAWS";
 import { AWSS3Config } from "./AWSManager";
+import { IS3Config } from "../interfaces/interfaceAWS";
+import { IController } from "../interfaces/interfaceController";
 
 export class InstanceManager {
   private formData: IUser['userData'];
-  private databaseConnection: IInstanceDB;
+  private imagem: IUser['imagem'];
+  private s3Config: IS3Config;
   private userRepository: IUserRepository;
   private userService: IUserService;
   private user: any;
   private controller: UserController;
-  private modelDB: IModelDB
+  private modelDB: IModelDB;
   private mid: IMidUser;
-  private imagem: IUser['imagem'];
-  private AWS: IAWSConfig
 
   constructor(formData: any, image: any) {
     this.formData = formData;
     this.imagem = image;
-    this.AWS = new AWSS3Config()
-    this.databaseConnection = new InstanceDB();
-    this.modelDB = new UserModelDB(this.databaseConnection.createConnection())
-    this.userRepository = new UserRepository(this.modelDB, this.AWS);
+    this.s3Config = new AWSS3Config(); 
+    this.modelDB = new UserModelDB(new InstanceDB().createConnection());
+    this.userRepository = new UserRepository(this.modelDB, this.s3Config);
     this.userService = new UserService(this.userRepository);
     this.user = new User(this.formData, this.userService, this.imagem);
-    this.mid = new MidUser(this.formData)
+    this.mid = new MidUser(this.formData);
     this.controller = new UserController(this.user, this.mid);
   }
 
-  getController(): UserController {
-    
-    return this.controller
+  getController(): IController {
+    return this.controller;
   }
+
 }

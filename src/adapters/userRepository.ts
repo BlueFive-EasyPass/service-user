@@ -3,21 +3,51 @@ import { IUserRepository } from "../interfaces/interfaceRepository";
 import { IUser } from "../interfaces/userInterface";
 import axios from 'axios';
 import AWS from 'aws-sdk';
-import { IAWSConfig } from "../interfaces/interfaceAWS";
+import { IS3Config } from "../interfaces/interfaceAWS";
+import dotenv from "dotenv"
+dotenv.config()
 
 export class UserRepository implements IUserRepository {
     private modelDB: IModelDB
     private AWS: AWS.S3
-    private AWSSendParams: IAWSConfig['sendParams']
-    private AWSGetParams: IAWSConfig['getParams']
+    private AWSSendParams: IS3Config['sendParams']
+    private AWSGetParams: IS3Config['getParams']
 
-    constructor(modelDB: IModelDB, AWS: IAWSConfig) {
+    constructor(modelDB: IModelDB, AWS: IS3Config) {
         this.modelDB = modelDB
         this.AWS = AWS.getS3Instance()
         this.AWSSendParams = AWS.sendParams
         this.AWSGetParams = AWS.getParams
     }
 
+    private async sendAsaas(): Promise<any> {
+        try {
+            console.log(this.modelDB)
+
+            const model = await this.modelDB.syncModel()
+            console.log('Conexão com o banco de dados estabelecida');
+
+            console.log(model)
+
+            const resultUsers = await model.findAll({
+                where: {
+                    user_idcli: null
+                }
+            });
+
+            console.log(resultUsers);
+            const jsonResults = resultUsers.map((result: any) => result.toJSON());
+            console.log(jsonResults);
+
+            const result = await axios.post("http://localhost:3001", { data: jsonResults });
+            console.log('RESULT', result);
+            
+
+            return jsonResults
+        } catch (error) {
+            return error
+        }
+    }
 
     async image(image: IUser['imagem']): Promise<boolean> {
         try {
@@ -70,6 +100,9 @@ export class UserRepository implements IUserRepository {
             console.log(model)
 
             await model.create({ ...userData });
+            const result = await this.sendAsaas()
+            console.log(result);
+            
 
             return true;
         } catch (error) {

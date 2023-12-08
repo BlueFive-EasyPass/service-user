@@ -38,7 +38,6 @@ export default () => <Resource>{
 
             try {
                 await controller.SignUp(reply)
-
             } catch (error) {
                 reply.code(500).send({ erro: "Erro ao processar a requisição" })
             }
