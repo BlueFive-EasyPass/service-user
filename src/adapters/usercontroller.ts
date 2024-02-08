@@ -194,4 +194,19 @@ export class UserController implements IController {
     }
 
 
+    async UpdateCustomer(data: any, reply: FastifyReply): Promise<any> {
+
+        try {
+            const result = await this.user.updateCustomer(data)
+            if (result) {
+                reply.code(200).send({ send: result })
+            } else {
+                reply.code(400).send({ error: 'Erro ao atualizar usuário' })
+            }
+        } catch (err) {
+            return reply.code(500).send({ error: err })
+        }
+    }
+
+
 }

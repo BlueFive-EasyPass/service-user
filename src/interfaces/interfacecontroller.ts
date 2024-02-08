@@ -9,4 +9,5 @@ export interface IController {
     ActivateUser(reply: FastifyReply): any
     SendImage(reply: FastifyReply): any
     GetImage(reply: FastifyReply): any
+    UpdateCustomer(data: any, reply: FastifyReply): Promise<boolean>;
 }

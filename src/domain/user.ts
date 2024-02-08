@@ -110,4 +110,15 @@ export class User implements IUser {
             throw new Error("Erro ao salvar no banco de dados");
         }
     }
+
+    async updateCustomer(data: any) {
+        try {
+            const result = await this.userService.updateCustomer(data)
+
+            return result
+        } catch (error) {
+            console.log('ERRO PARA CARALHO')
+            throw new Error("Erro ao salvar no banco de dados");
+        }
+    }
 }

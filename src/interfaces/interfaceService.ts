@@ -9,5 +9,6 @@ export interface IUserService {
     activateUser(userData: IUser['userData']): Promise<boolean>
     sendImage(image: IUser['imagem']): Promise<boolean>
     getImage(image: IUser['imagem']): Promise<any>
+    updateCustomer(data: any): Promise<boolean>;
   }
   

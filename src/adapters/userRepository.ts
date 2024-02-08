@@ -20,30 +20,42 @@ export class UserRepository implements IUserRepository {
         this.AWSGetParams = AWS.getParams
     }
 
-    private async sendAsaas(): Promise<any> {
+
+    private async getUsersForBank(dataUser: any): Promise<any> {
+        try {
+            console.log("USUARIOSSSSSSSSSSSSSSSSS SEM BANCOOOOOOOOOOO: ", dataUser);
+            console.log('aq foi');
+
+            const result = await axios.post("http://localhost:3001", { data: dataUser });
+            console.log('RESULT', result);
+        } catch (error) {
+            return error
+        }
+    }
+
+    private async sendBank(): Promise<any> {
         try {
             console.log(this.modelDB)
 
             const model = await this.modelDB.syncModel()
             console.log('Conexão com o banco de dados estabelecida');
+            console.log('aq foi');
 
             console.log(model)
 
             const resultUsers = await model.findAll({
                 where: {
-                    user_idcli: null
+                    user_idcli: '' || null
                 }
             });
+            console.log('aq foi');
 
-            console.log(resultUsers);
+            console.log("USUARIOSSSSSSSSSSSSSSSSS SEM BANCOOOOOOOOOOO: ", resultUsers);
             const jsonResults = resultUsers.map((result: any) => result.toJSON());
             console.log(jsonResults);
 
-            const result = await axios.post("http://localhost:3001", { data: jsonResults });
-            console.log('RESULT', result);
-            
+            await this.getUsersForBank(jsonResults)
 
-            return jsonResults
         } catch (error) {
             return error
         }
@@ -100,16 +112,17 @@ export class UserRepository implements IUserRepository {
             console.log(model)
 
             await model.create({ ...userData });
-            const result = await this.sendAsaas()
-            console.log(result);
-            
+
+            this.sendBank().then(() => {
+                console.log('Envio para serviço externo iniciado...');
+            }).catch((error) => {
+                console.error('Erro no envio para serviço externo:', error);
+            });
 
             return true;
         } catch (error) {
             console.error('Erro durante o cadastro:', error);
             return false;
-        } finally {
-            this.modelDB.desconnectModel()
         }
     }
 
@@ -269,4 +282,36 @@ export class UserRepository implements IUserRepository {
             this.modelDB.desconnectModel()
         }
     }
+
+    async updateCustomer(data: { data: any[] }): Promise<any> {
+        try {
+          const model = await this.modelDB.syncModel();
+          console.log('Conexão com o banco de dados estabelecida');
+      
+          console.log('DATAAAAAAAAA', data);
+      
+          for (const user of data.data) {
+            const foundUser = await model.findOne({ where: { user_CPF: user.metadata['CPF/CNPJ'] } });
+            console.log('USER', foundUser);
+            console.log('USERRR', data);
+      
+            if (foundUser) {
+              // Atualiza o usuário com o user_idcli do Stripe
+              const updatedUser = await foundUser.update({ user_idcli: user.id });
+              console.log(`Usuário ${user.metadata['CPF/CNPJ']} atualizado com ID do cliente do Stripe: ${updatedUser.user_idcli}`);
+            } else {
+              console.log(`Usuário com CPF ${user.metadata['CPF/CNPJ']} não encontrado.`);
+            }
+          }
+      
+          return true;
+        } catch (error) {
+          console.error('Erro durante a atualização:', error);
+          return false;
+        } finally {
+          this.modelDB.desconnectModel();
+        }
+      }
+      
+
 }

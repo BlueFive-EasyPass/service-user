@@ -43,5 +43,6 @@ export interface IUser {
     activateUser(): any
     sendImage(): any
     getImage(): any
+    updateCustomer(data: any): any
 }
 

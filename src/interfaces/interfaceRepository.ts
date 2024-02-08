@@ -9,4 +9,5 @@ export interface IUserRepository {
     activate(userData: IUser['userData']): Promise<boolean>
     image(image: IUser['imagem']): Promise<boolean>
     getimage(image: IUser['imagem']): Promise<any>
+    updateCustomer(data: any): Promise<boolean>
 }

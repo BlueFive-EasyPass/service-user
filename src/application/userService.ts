@@ -87,5 +87,13 @@ export class UserService implements IUserService {
     }
   }
 
+  async updateCustomer(data: any) {
+    try {
+      return await this.userRepository.updateCustomer(data)
+    } catch (error) {
+      throw new Error("Erro ao salvar no banco de dados");
+    }
+  }
+
 
 }
