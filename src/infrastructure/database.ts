@@ -13,6 +13,9 @@ export class SequelizeConnection implements IDatabaseConnection {
     const password = process.env.password
     const host = process.env.host
 
+    console.log('Teste', database, username, password, host);
+    
+
     this.sequelize = new Sequelize({
       database: database,
       username: username,

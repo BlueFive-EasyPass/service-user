@@ -1,7 +1,7 @@
 import { FastifyReply, FastifyRequest } from 'fastify'
 import { Resource } from 'fastify-autoroutes'
 import { InstanceManager } from '../instanceManager'
-import { MidUser } from '../../application/midUser'
+import { MidUser } from '../../application/miduser'
 import { IMidUser } from '../../interfaces/interfaceMidUser'
 import { IController } from '../../interfaces/interfaceController'
 

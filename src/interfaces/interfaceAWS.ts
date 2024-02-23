@@ -6,4 +6,3 @@ export interface IS3Config {
     getParams(image: IUser['imagem']): any
 }
 
-  
